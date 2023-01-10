@@ -6,7 +6,6 @@ import se.curity.identityserver.sdk.service.ExceptionFactory
 import se.curity.identityserver.sdk.service.HttpClient
 import se.curity.identityserver.sdk.service.Json
 import se.curity.identityserver.sdk.service.WebServiceClientFactory
-import java.util.*
 
 interface OpaAuthorizationManagerPluginConfig : Configuration
 {

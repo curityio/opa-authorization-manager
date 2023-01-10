@@ -19,10 +19,10 @@ import se.curity.identityserver.sdk.service.Json
 import se.curity.identityserver.sdk.service.WebServiceClient
 import java.io.IOException
 import java.time.Duration
-import java.util.*
 
 class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManagerPluginConfig) :
-    ManagedObject<OpaAuthorizationManagerPluginConfig?>(configuration) {
+    ManagedObject<OpaAuthorizationManagerPluginConfig?>(configuration)
+{
     private val json: Json = configuration.getJson()
     private val exceptionFactory: ExceptionFactory = configuration.getExceptionFactory()
     private val logger: Logger = LoggerFactory.getLogger(OpaAuthorizationManagerManagedObject::class.java)
@@ -32,9 +32,9 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
     @Synchronized
     fun getOpaResponse(
         subject: SubjectAttributes?,
-        action: GraphQLAuthorizationActionAttributes?,
+        action: GraphQLAuthorizationActionAttributes?, //TODO: POST, GET, etc. Not yet implemented
         resource: GraphQLAuthorizationResourceAttributes?,
-        context: ContextAttributes?,
+        context: ContextAttributes?, //TODO: Use context attributes as needed
         client: WebServiceClient
     ): AuthorizationResult<GraphQLObligation>
     {
@@ -44,8 +44,6 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
             subject?.get("groups")?.getValueOfType(String::class.java),
             subject?.subject,
             resourceType
-            //TODO: Handle action (POST, GET, etc.)
-            //TODO: Use context as needed
         )
 
         val opaHttpResponse: HttpResponse
@@ -81,9 +79,12 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
         }
 
         val opaResponse = opaHttpResponse.body(HttpResponse.asJsonObject(json)).toOpaResponse()
-        val opaObligation :GraphQLObligation = if(opaResponse.unauthorizedFields?.isEmpty() == true) {
+        val opaObligation :GraphQLObligation = if(opaResponse.unauthorizedFields?.isEmpty() == true)
+        {
             OpaBeginOperationObligation(opaResponse)
-        } else{
+        }
+        else
+        {
             OpaFilterResultObligation(opaResponse)
         }
 
@@ -91,33 +92,8 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
     }
 
     @Throws(IOException::class)
-    override fun close() {
+    override fun close()
+    {
         super.close()
-    }
-}
-
-class OpaRequestBody(
-    group: String?,
-    subject: String?,
-    resourceType: String?
-) {
-    val input = mapOf(
-        Pair("groups", group),
-        Pair("subject", subject),
-        Pair("resourceType", resourceType)
-    )
-}
-
-class OpaResponse(
-    val allow: Boolean,
-    val unauthorizedFields: ArrayList<String>?
-)
-
-fun Map<String, Any>.toOpaResponse(): OpaResponse {
-    with(this["result"] as Map<String, *>) {
-        return@toOpaResponse OpaResponse(
-            this["allow"] as Boolean,
-            this["unauthorized_fields"] as ArrayList<String>?
-        )
     }
 }

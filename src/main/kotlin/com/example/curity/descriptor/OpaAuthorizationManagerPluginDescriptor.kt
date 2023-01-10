@@ -19,7 +19,8 @@ class OpaAuthorizationManagerPluginDescriptor : AuthorizationManagerPluginDescri
 
     override fun getPluginImplementationType(): String = "opa-authorization-manager"
 
-    override fun createManagedObject(config: OpaAuthorizationManagerPluginConfig): Optional<OpaAuthorizationManagerManagedObject> {
+    override fun createManagedObject(config: OpaAuthorizationManagerPluginConfig): Optional<OpaAuthorizationManagerManagedObject>
+    {
         return Optional.of(OpaAuthorizationManagerManagedObject(config))
     }
 }
