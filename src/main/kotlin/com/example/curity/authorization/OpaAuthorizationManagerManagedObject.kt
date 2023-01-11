@@ -53,7 +53,7 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
             subject?.subject,
             resourceType
         )
-        
+
         val opaHttpResponse: HttpResponse
 
         try
