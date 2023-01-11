@@ -1,6 +1,8 @@
 package com.example.curity.config;
 
 import se.curity.identityserver.sdk.config.Configuration
+import se.curity.identityserver.sdk.config.annotation.DefaultInteger
+import se.curity.identityserver.sdk.config.annotation.DefaultString
 import se.curity.identityserver.sdk.config.annotation.Description
 import se.curity.identityserver.sdk.service.ExceptionFactory
 import se.curity.identityserver.sdk.service.HttpClient
@@ -16,9 +18,11 @@ interface OpaAuthorizationManagerPluginConfig : Configuration
     fun getOpaHost(): String
 
     @Description("The port where OPA is exposed")
+    @DefaultInteger(8181)
     fun getOpaPort(): Int
 
     @Description("The OPA path")
+    @DefaultString("/v1/data/curity/")
     fun getOpaPath(): String
 
     fun getExceptionFactory(): ExceptionFactory
