@@ -42,18 +42,18 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
     {
         var resourceType: String = resource?.get("resourceType")?.getValueOfType(String::class.java).toString()
 
-        val body = OpaRequestBody(
-            subject?.get("group")?.getValueOfType(String::class.java),
-            subject?.subject,
-            resourceType
-        )
-
         /* OPA package name doesn't allow - converting the provided user-management -> um */
         if (resourceType == "user-management")
         {
             resourceType = "um"
         }
 
+        val body = OpaRequestBody(
+            subject?.get("group")?.getValueOfType(String::class.java),
+            subject?.subject,
+            resourceType
+        )
+        
         val opaHttpResponse: HttpResponse
 
         try
