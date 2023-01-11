@@ -127,4 +127,4 @@ This should return the response below from OPA that includes the attribute `unau
 - [User Management with GraphQL](https://curity.io/resources/learn/graphql-user-management/)
 - [Authorizing Access to User Data](https://curity.io/resources/learn/authorizing-user-access/)
 
-Copyright (C) 2022 Curity AB.
+Copyright (C) 2023 Curity AB.
