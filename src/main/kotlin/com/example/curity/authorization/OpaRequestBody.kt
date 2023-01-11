@@ -7,7 +7,7 @@ class OpaRequestBody(
 )
 {
     val input = mapOf(
-        Pair("groups", group),
+        Pair("group", group),
         Pair("subject", subject),
         Pair("resourceType", resourceType)
     )

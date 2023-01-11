@@ -32,19 +32,27 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
     @Synchronized
     fun getOpaResponse(
         subject: SubjectAttributes?,
-        action: GraphQLAuthorizationActionAttributes?, //TODO: POST, GET, etc. Not yet implemented
+        /* TODO: POST, GET, etc. Not yet implemented */
+        action: GraphQLAuthorizationActionAttributes?,
         resource: GraphQLAuthorizationResourceAttributes?,
-        context: ContextAttributes?, //TODO: Use context attributes as needed
+        /* TODO: Use context attributes as needed */
+        context: ContextAttributes?,
         client: WebServiceClient
     ): AuthorizationResult<GraphQLObligation>
     {
-        val resourceType: String = resource?.get("resourceType")?.getValueOfType(String::class.java).toString()
+        var resourceType: String = resource?.get("resourceType")?.getValueOfType(String::class.java).toString()
 
         val body = OpaRequestBody(
-            subject?.get("groups")?.getValueOfType(String::class.java),
+            subject?.get("group")?.getValueOfType(String::class.java),
             subject?.subject,
             resourceType
         )
+
+        /* OPA package name doesn't allow - converting the provided user-management -> um */
+        if (resourceType == "user-management")
+        {
+            resourceType = "um"
+        }
 
         val opaHttpResponse: HttpResponse
 
@@ -78,16 +86,25 @@ class OpaAuthorizationManagerManagedObject(configuration: OpaAuthorizationManage
             throw exceptionFactory.externalServiceException("Unable to connect to OPA. Check the connection.");
         }
 
-        val opaResponse = opaHttpResponse.body(HttpResponse.asJsonObject(json)).toOpaResponse()
-        val opaObligation :GraphQLObligation = if(opaResponse.unauthorizedFields?.isEmpty() == true)
-        {
-            OpaBeginOperationObligation(opaResponse)
-        }
-        else
-        {
-            OpaFilterResultObligation(opaResponse)
-        }
+        val opaResponse: OpaResponse
+        val opaObligation :GraphQLObligation
 
+        try
+        {
+            opaResponse = opaHttpResponse.body(HttpResponse.asJsonObject(json)).toOpaResponse()
+            opaObligation = if(opaResponse.unauthorizedFields?.isEmpty() == true)
+            {
+                OpaBeginOperationObligation(opaResponse)
+            }
+            else
+            {
+                OpaFilterResultObligation(opaResponse)
+            }
+        }
+        catch (e: Exception) {
+            logger.debug("Ann error occurred in handling the response from OPA. Returning deny.")
+            return AuthorizationResult.deny("An error occurred in handling the response from OPA. Returning deny.")
+        }
         return AuthorizationResult.allow(opaObligation)
     }
 
