@@ -8,7 +8,7 @@ A custom, Kotlin-based Authorization Manager plugin using OPA for authorization 
 Note: The plugin requires at least version 7.3 of the Curity Identity Server.
 
 ## Introduction
-The Curity Identity Server can leverage Authorization Managers to control access to it's exposed GraphQL APIs for User Management and DCR. This Authorization Manager leverage Open Policy Agent (OPA) as an external authorization engine to determine fine-grained access. OPA holds a policy and receives an authorization request from the plugin. The plugin handles the authorization response and controls access to the requested resource. The plugin makes use of an obligation filter in order to redact individual fields per the OPA policy.
+The Curity Identity Server can leverage Authorization Managers to control access to its exposed GraphQL APIs for User Management and DCR. This Authorization Manager leverage Open Policy Agent (OPA) as an external authorization engine to determine fine-grained access. OPA holds a policy and receives an authorization request from the plugin. The plugin handles the authorization response and controls access to the requested resource. The plugin makes use of an obligation filter in order to redact individual fields per the OPA policy.
 
 ## Building the Plugin
 
@@ -29,22 +29,25 @@ For more information about installing plugins, refer to the [Plugin Installation
 | `OPA Port`   | String | The port that OPA is exposing its runtime service on.                                                                                                                 | `8443`                  | `8181`          |
 | `OPA Path`   | String | The path where the appropriate policy of OPA is exposed. Note that by default the plugin adds `dcr` and `um` to this path depending on which GraphQL API is accessed. | `/v1/data/mynamespace/` | `/v1/data/curity/` |
 
+### Create the Authorization Manager
+Navigate to `System` -> `Authorization` and click `New Authorization`. Give it a name (`opa-authz-mngr` for example) and choose the type `Opa Authorization Manager`. Then provided the appropriate configurations for HttpClient, host, port, and path. Commit the changes.
+
 ### DCR GraphQL API
 
-In order to protect the DCR GraphQL API, the Authorization Manager needs to be added to the Token Service Profile. Navigate to `Token Service` -> `General` and select the configured Authorization Manager from the drop-down menu.
+In order to protect the DCR GraphQL API, the Authorization Manager needs to be added to the Token Service Profile. Navigate to `Token Service` -> `General` and select the configured Authorization Manager (opa-authz-mngr) from the drop-down menu.
 
 ### User Management GraphQL API
 
-In order to protect the User Management GraphQL API, the Authorization Manager needs to be added to the User Management Profile. Navigate to `User Management` -> `General` and select the configured Authorization manager from the drop-down menu.
+In order to protect the User Management GraphQL API, the Authorization Manager needs to be added to the User Management Profile. Navigate to `User Management` -> `General` and select the configured Authorization Manager (opa-authz-mngr) from the drop-down menu.
 
 ## Testing
 
 This repository contains a docker compose file that will run an instance of the Curity Identity Server, a data source with test data and an instance of [OPA](https://hub.docker.com/r/openpolicyagent/opa/). Running this environment will provide a fully configured environment that can be used to test the use cases and the plugin.
 
-A script is available that will build and deploy the OPA Authorization Manager Plugin and start the docker containers. Run `/deploy.sh` to get everything up and running. Run `./teardown.sh` to stop and remove all the containers.
+A script is available that will build and deploy the OPA Authorization Manager Plugin and start the docker containers. Run `/deploy.sh` to get everything up and running. Make sure to copy a valid license with the name `license.json` into `components/idsvr` before deploying. Run `./teardown.sh` to stop and remove all the containers.
 
-1. Using [OAuth.tools](https://oauth.tools/), initiate a code flow using the `opa-demo` client (secret is `Password1`).
-2. Log in with a user, `admin` or `demouser` (by default both have the password `Password1`). The `admin` user belongs to the group `admin` that has full access to the GraphQL APIs. The `demouser` belongs to the `devops` group that is subject to filtration of certain fields for both DCR and User Management data. This should be clear when reviewing the policy used by OPA. Note that the group claim is issued by default per the configuration.
+1. Using for example cURL or [OAuth.tools](https://oauth.tools/), initiate a code flow using the `opa-demo` client (secret is `Password1`). This guide describes how to run the [Code Flow using cURL](https://curity.io/resources/learn/test-using-curl/) and this guide how to [run with OAuth.tools](https://curity.io/resources/learn/test-using-oauth-tools/). For both, remember to change the client ID from `www` -> `opa-demo` to match the configuration used in this example.
+2. Log in with a user, `admin` or `demouser` (by default both have the password `Password1`). The `admin` user belongs to the group `admin` that has full access to the GraphQL APIs. The `demouser` belongs to the `devops` group that is subject to filtration of certain fields for both DCR and User Management data. Review the policy used by OPA to check which fields are filtered out for the devops group. Note that the group claim is issued by default per the configuration.
 3. The access token that is obtained from running the code flow can be used in a call to either of the GraphQL APIs. Using for example Postman or Insomnia, construct a query and add the token in the `Authorization` header.
 
 ### Example User Query
@@ -96,7 +99,7 @@ To test OPA alone without the involvement of the Authorization Manager a sample 
 ```json
 POST /v1/data/curity/um HTTP/1.1
 Host: localhost:8181
-Content-Type: application/xacml+json
+Content-Type: application/json
 {
     "input": {
         "group": "devops",
@@ -105,7 +108,7 @@ Content-Type: application/xacml+json
 }
 ```
 
-This should return the response below from OPA that includes the attribute `unauthorized_fields` that in this case indicates what fields that the Authorization Manager should filter, i.e. `name` and `phoneNumbers`.
+This should return the response below from OPA that includes the attribute `unauthorized_fields` that in this case indicates what fields that the Authorization Manager should filter, i.e., `name` and `phoneNumbers`.
 
 ```json
 {
