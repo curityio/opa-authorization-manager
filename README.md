@@ -30,7 +30,7 @@ For more information about installing plugins, refer to the [Plugin Installation
 | `OPA Path`   | String | The path where the appropriate policy of OPA is exposed. Note that by default the plugin adds `dcr` and `um` to this path depending on which GraphQL API is accessed. | `/v1/data/mynamespace/` | `/v1/data/curity/` |
 
 ### Create the Authorization Manager
-Navigate to `System` -> `Authorization` and click `New Authorization`. Give it a name (`opa-authz-mngr` for example) and choose the type `Opa Authorization Manager`. Then provided the appropriate configurations for HttpClient, host, port, and path. Commit the changes.
+Navigate to `System` -> `Authorization` and click `New Authorization`. Give it a name (`opa-authz-mngr` for example) and choose the type `Opa Authorization Manager`. Then provide the appropriate configurations for HttpClient, host, port, and path. Commit the changes.
 
 ### DCR GraphQL API
 
